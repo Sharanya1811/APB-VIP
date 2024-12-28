@@ -30,8 +30,10 @@ endclass
   task apb_scoreboard::run_phase(uvm_phase phase);
     forever
       begin
+        fork
         master_fifo.get(master_data);
         slave_fifo.get(slave_data);
+        join
         check_data(master_data,slave_data);
       end
   endtask
