@@ -32,37 +32,46 @@ endclass
 
   task apb_master_monitor::run_phase(uvm_phase phase);
     super.run_phase(phase);
-    data_sent=apb_trans::type_id::create("data_sent");
-    forever
+          data_sent=apb_trans::type_id::create("data_sent");
+    forever begin
       collect_data();
+    end
   endtask 
 
   task apb_master_monitor::collect_data();
     @(vif.m_mon_cb)
-    if(vif.m_mon_cb.paddr || vif.m_mon_cb.pwrite || vif.m_mon_cb.psel || vif.m_mon_cb.pwdata || vif.m_mon_cb.prdata || vif.m_mon_cb.pready || vif.m_mon_cb.penable)
+    if(vif.m_mon_cb.paddr ||  vif.m_mon_cb.pwrite || vif.m_mon_cb.psel || vif.m_mon_cb.pwdata)
       begin
+        if(vif.m_mon_cb.pwrite==1)
+          begin    
+            wait(vif.m_mon_cb.pready && vif.m_mon_cb.penable)
         data_sent.psel   = vif.m_mon_cb.psel;
         data_sent.paddr  = vif.m_mon_cb.paddr;
         data_sent.pwrite = vif.m_mon_cb.pwrite;
         data_sent.penable = vif.m_mon_cb.penable;
         data_sent.pwdata  = vif.m_mon_cb.pwdata;
-         `uvm_info(get_full_name(),$sformatf("value of master pwdata=%d",data_sent.pwdata),UVM_LOW)
-        if(vif.m_mon_cb.pwrite==1)
-          begin
+         data_sent.pready =vif.m_mon_cb.pready;
+            $display($time,"TIME");
             `uvm_info(get_full_name(),$sformatf("value of master pwdata=%d",data_sent.pwdata),UVM_LOW) 
-            `uvm_info(get_full_name(),$sformatf("value of master pwready=%d",vif.m_mon_cb.pready),UVM_LOW)
+            `uvm_info(get_full_name(),$sformatf("value of master pready=%d",vif.m_mon_cb.pready),UVM_LOW)
             `uvm_info(get_full_name(),$sformatf("value of master penable=%d",vif.m_mon_cb.penable),UVM_LOW)
             `uvm_info(get_full_name(),$sformatf("value of master psel=%d",vif.m_mon_cb.psel),UVM_LOW)
-            `uvm_info(get_full_name(),$sformatf("value of master paddr=%d",vif.m_mon_cb.paddr),UVM_LOW)     
-            wait(vif.m_mon_cb.pready && vif.m_mon_cb.penable)
+            `uvm_info(get_full_name(),$sformatf("value of master paddr=%d",vif.m_mon_cb.paddr),UVM_LOW)  
             `uvm_info(get_full_name(),$sformatf("value of master pready=%d",vif.m_mon_cb.pready),UVM_LOW)
            master_mon2sb.write(data_sent);
           end
         else
           begin
             wait(vif.m_mon_cb.pready && vif.m_mon_cb.penable)
+         data_sent.psel   = vif.m_mon_cb.psel;
+        data_sent.paddr  = vif.m_mon_cb.paddr;
+        data_sent.pwrite = vif.m_mon_cb.pwrite;
+        data_sent.penable = vif.m_mon_cb.penable;
+        data_sent.pwdata  = vif.m_mon_cb.pwdata;
+         data_sent.pready =vif.m_mon_cb.pready;   
             data_sent.prdata = vif.m_mon_cb.prdata;
           master_mon2sb.write(data_sent);
           end
       end
    endtask 
+ 
