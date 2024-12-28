@@ -1,4 +1,5 @@
 
+
  class apb_slave_monitor extends uvm_monitor;
    `uvm_component_utils(apb_slave_monitor)
    uvm_analysis_port#(apb_trans) slave_mon2sb;
@@ -32,12 +33,13 @@ endclass
 
   task apb_slave_monitor::run_phase(uvm_phase phase);
     super.run_phase(phase);
-    data_sent=apb_trans::type_id::create("data_sent");
-    forever
+          data_sent=apb_trans::type_id::create("data_sent");
+    forever begin
       collect_data();
+    end
   endtask
-  
-  task apb_slave_monitor::collect_data();
+    
+    task apb_slave_monitor::collect_data();
     if(vif.s_mon_cb.paddr || vif.s_mon_cb.pwrite || vif.s_mon_cb.psel ||  vif.s_mon_cb.pwdata)
       begin
         data_sent.paddr<=vif.s_mon_cb.paddr;
@@ -48,11 +50,11 @@ endclass
         data_sent.penable = vif.s_mon_cb.penable;
     if(data_sent.penable) begin
     wait(vif.s_mon_cb.pready)
-    `uvm_info(get_full_name(),$sformatf("value of slave pwdata=%d",vif.s_mon_cb.pwdata),UVM_LOW) 
-  `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
-  `uvm_info(get_full_name(),$sformatf("value of slave penable=%d",vif.s_mon_cb.penable),UVM_LOW)
-   `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
-      `uvm_info(get_full_name(),$sformatf("value of slave paddr=%d",vif.s_mon_cb.paddr),UVM_LOW)
+       `uvm_info(get_full_name(),$sformatf("value of slave pwdata=%d",vif.s_mon_cb.pwdata),UVM_LOW) 
+       `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
+       `uvm_info(get_full_name(),$sformatf("value of slave penable=%d",vif.s_mon_cb.penable),UVM_LOW)
+       `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
+       `uvm_info(get_full_name(),$sformatf("value of slave paddr=%d",vif.s_mon_cb.paddr),UVM_LOW)
     if(vif.s_mon_cb.pwrite)
       begin
         data_sent.pready=vif.s_mon_cb.pready;
@@ -61,6 +63,11 @@ endclass
       end
     else
       begin
+        `uvm_info(get_full_name(),$sformatf("value of slave prdata=%d",vif.s_mon_cb.prdata),UVM_LOW) 
+        `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
+        `uvm_info(get_full_name(),$sformatf("value of slave penable=%d",vif.s_mon_cb.penable),UVM_LOW)
+        `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
+        `uvm_info(get_full_name(),$sformatf("value of slave paddr=%d",vif.s_mon_cb.paddr),UVM_LOW)
         data_sent.pready=vif.s_mon_cb.pready;
         data_sent.prdata =vif.s_mon_cb.prdata;
         slave_mon2sb.write(data_sent);
