@@ -1,5 +1,4 @@
 
-
  class apb_slave_monitor extends uvm_monitor;
    `uvm_component_utils(apb_slave_monitor)
    uvm_analysis_port#(apb_trans) slave_mon2sb;
@@ -38,30 +37,28 @@ endclass
       collect_data();
     end
   endtask
+
     
     task apb_slave_monitor::collect_data();
-    if(vif.s_mon_cb.paddr || vif.s_mon_cb.pwrite || vif.s_mon_cb.psel ||  vif.s_mon_cb.pwdata)
-      begin
+     @(vif.s_mon_cb)
+    if(vif.s_mon_cb.psel) begin
         data_sent.paddr<=vif.s_mon_cb.paddr;
         data_sent.psel<=vif.s_mon_cb.psel;
         data_sent.pwrite<=vif.s_mon_cb.pwrite;
-      end
-    @(vif.s_mon_cb)
         data_sent.penable = vif.s_mon_cb.penable;
-    if(data_sent.penable) begin
-    wait(vif.s_mon_cb.pready)
+      
+    if(data_sent.penable && vif.s_mon_cb.pready) begin
        `uvm_info(get_full_name(),$sformatf("value of slave pwdata=%d",vif.s_mon_cb.pwdata),UVM_LOW) 
        `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
        `uvm_info(get_full_name(),$sformatf("value of slave penable=%d",vif.s_mon_cb.penable),UVM_LOW)
        `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
        `uvm_info(get_full_name(),$sformatf("value of slave paddr=%d",vif.s_mon_cb.paddr),UVM_LOW)
-    if(vif.s_mon_cb.pwrite)
-      begin
+      if(vif.s_mon_cb.pwrite) begin
         data_sent.pready=vif.s_mon_cb.pready;
         data_sent.pwdata  = vif.s_mon_cb.pwdata;
-        slave_mon2sb.write(data_sent);
+       slave_mon2sb.write(data_sent);
       end
-    else
+      else
       begin
         `uvm_info(get_full_name(),$sformatf("value of slave prdata=%d",vif.s_mon_cb.prdata),UVM_LOW) 
         `uvm_info(get_full_name(),$sformatf("value of slave pready=%d",vif.s_mon_cb.pready),UVM_LOW)
@@ -73,5 +70,5 @@ endclass
         slave_mon2sb.write(data_sent);
       end
     end
+  end
   endtask
-
