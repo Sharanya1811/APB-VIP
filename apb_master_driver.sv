@@ -29,7 +29,7 @@ endclass
     super.connect_phase(phase);
     vif=cfg.vif;
   endfunction 
-
+ 
   task apb_master_driver::reset();
     @(vif.m_drv_cb);
     vif.m_drv_cb.paddr<=0;
@@ -39,63 +39,52 @@ endclass
     vif.m_drv_cb.pwdata<=0;
     vif.m_drv_cb.pstrb<=0;
  endtask   
-    
+        
   task apb_master_driver::run_phase(uvm_phase phase);
     reset();
    forever begin
      seq_item_port.get_next_item(req);
-     `uvm_info(get_full_name(),"MASTER_DRIVER",UVM_LOW)
-     if(req.pwrite==1) begin
-       `uvm_info(get_full_name(),"MASTER_WRITE",UVM_LOW)
+     if(req.pwrite==1)
        drive_write(req);
-     end
      else
        drive_read(req);
      seq_item_port.item_done();
    end
   endtask 
  
-    
     task apb_master_driver::drive_read(apb_trans req);
       @(vif.m_drv_cb);
-      
       vif.m_drv_cb.paddr<=req.paddr;
       vif.m_drv_cb.pwrite<=req.pwrite;
       vif.m_drv_cb.psel<=req.psel;
       vif.m_drv_cb.pwdata<=req.pwdata;
-      vif.m_drv_cb.penable<=0;
-      @(vif.m_drv_cb)
-      vif.m_drv_cb.penable<=1;
-      while(!vif.m_drv_cb.pready)
-      begin
-        @(vif.m_drv_cb);
-      end 
-      `uvm_info(get_full_name(),$sformatf("value of master drv pwdata=%d",req.pwdata),UVM_LOW) 
-     `uvm_info(get_full_name(),$sformatf("value of master drv pready=%d",vif.m_drv_cb.pready),UVM_LOW)
-      `uvm_info(get_full_name(),$sformatf("value of master drv psel=%d",req.psel),UVM_LOW)
-      `uvm_info(get_full_name(),$sformatf("value of master drv paddr=%d",req.paddr),UVM_LOW)
-        vif.m_drv_cb.psel<=0;
-        vif.m_drv_cb.penable<=0;
+      
+      @(vif.m_drv_cb);
+      vif.m_drv_cb.penable<=1'b1;
+
+      @(posedge vif.m_drv_cb.pready);
+      
+       @(vif.m_drv_cb);
+       vif.m_drv_cb.penable<=0;
+       vif.m_drv_cb.psel<=0;
    endtask
    
+    
+   
+    
     task apb_master_driver::drive_write(apb_trans req);
       @(vif.m_drv_cb);
-      
       vif.m_drv_cb.paddr<=req.paddr;
       vif.m_drv_cb.pwrite<=req.pwrite;
       vif.m_drv_cb.psel<=req.psel;
       vif.m_drv_cb.pwdata<=req.pwdata;
-      vif.m_drv_cb.penable<=0;
-      @(vif.m_drv_cb)
-      vif.m_drv_cb.penable<=1;
-      while(!vif.m_drv_cb.pready)
-      begin
-        @(vif.m_drv_cb);
-      end 
-      `uvm_info(get_full_name(),$sformatf("value of master drv pwdata=%d",req.pwdata),UVM_LOW) 
-     `uvm_info(get_full_name(),$sformatf("value of master drv pready=%d",vif.m_drv_cb.pready),UVM_LOW)
-      `uvm_info(get_full_name(),$sformatf("value of master drv psel=%d",req.psel),UVM_LOW)
-      `uvm_info(get_full_name(),$sformatf("value of master drv paddr=%d",req.paddr),UVM_LOW)
-        vif.m_drv_cb.psel<=0;
-        vif.m_drv_cb.penable<=0;
+      
+      @(vif.m_drv_cb);
+      vif.m_drv_cb.penable<=1'b1;
+
+      @(posedge vif.m_drv_cb.pready);
+      
+       @(vif.m_drv_cb);
+       vif.m_drv_cb.penable<=0;
+       vif.m_drv_cb.psel<=0;
    endtask
