@@ -59,6 +59,25 @@ interface apb_interface();
     input pready;
     input prdata;
     endclocking
-    
+     
   
+   apb_addr_stable: assert property (
+     @(posedge pclk) disable iff (!presetn)
+    psel && penable |-> paddr 
+  ) else $fatal("APB violation: PADDR changed during PENABLE");
+
+  // Assertion: PENABLE should not be high unless PSEL was high
+  apb_penable_after_psel: assert property (
+    @(posedge pclk) disable iff (!presetn)
+    penable |-> psel
+  ) else $fatal("APB violation: PENABLE without PSEL");
+
+  // Assertion: PREADY sampled only when PENABLE is high
+  apb_pready_during_penable: assert property (
+    @(posedge pclk) disable iff (!presetn)
+    pready |-> penable
+  ) else $fatal("APB violation: PREADY asserted without PENABLE");
+   
+   
+ 
 endinterface
